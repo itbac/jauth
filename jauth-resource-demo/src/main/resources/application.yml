@@ -1,0 +1,20 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: jauth-resource-demo
+
+jauth:
+  security:
+    # Secure paths that require authentication
+    secure-paths: 
+      - "/api/**"
+    # Paths that don't require authentication
+    permit-all-paths:
+      - "/actuator/health"
+      - "/public/**"
+
+logging:
+  level:
+    io.jauth: DEBUG
