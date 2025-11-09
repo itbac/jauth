@@ -17,6 +17,66 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+  # Redis configuration for refresh token storage
+  redis:
+    host: localhost
+    port: 6379
+    # database: 0
+    # password: # Uncomment and set if Redis requires authentication
+    # timeout: 2000ms
+    # jedis:
+    #   pool:
+    #     max-active: 8
+    #     max-wait: -1ms
+    #     max-idle: 8
+    #     min-idle: 0
+
+# JAuth Authentication Configuration
+jauth:
+  # Client type specific configurations
+  # This allows different client types (web, app, mini-program) to use different secrets and token strategies
+  client-type:
+    web:
+      access-token:
+        # Access token expiration time in seconds
+        expires-in: 3600  # 1 hour
+        # Signature algorithm for JWT tokens
+        # Supported values: HMAC-SHA256, HMAC-SHA384, HMAC-SHA512, RS256, RS384, RS512
+        algorithm: RS256
+        # Public key for verifying JWT tokens (Base64 encoded)
+        public-key: "your-base64-encoded-public-key-here"
+        # Private key for signing JWT tokens (Base64 encoded)
+        private-key: "your-base64-encoded-private-key-here"
+      refresh-token:
+        expires-in: 604800  # 7 days
+        security:
+          hash-algorithm: HMAC-SHA256
+          signature-headers:
+            - User-Agent
+            - X-Forwarded-For
+            - X-login-time
+          cookie:
+            same-site: Lax
+            secure: true
+    app:
+      access-token:
+        # Access token expiration time in seconds
+        expires-in: 3600  # 1 hour
+        # Signature algorithm for JWT tokens
+        # Supported values: HMAC-SHA256, HMAC-SHA384, HMAC-SHA512, RS256, RS384, RS512
+        algorithm: RS256
+        # Public key for verifying JWT tokens (Base64 encoded)
+        public-key: "your-base64-encoded-public-key-here"
+        # Private key for signing JWT tokens (Base64 encoded)
+        private-key: "your-base64-encoded-private-key-here"
+      refresh-token:
+        expires-in: 604800  # 7 days
+        security:
+          hash-algorithm: HMAC-SHA256
+          signature-headers:
+            - User-Agent
+            - X-Forwarded-For
+            - X-login-time
 
 logging:
   level:

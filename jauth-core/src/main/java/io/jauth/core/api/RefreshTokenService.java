@@ -15,38 +15,34 @@
  * limitations under the License.
  */
 
-package io.jauth.core;
+package io.jauth.core.api;
 
 /**
- * User context holder for storing and retrieving user information
- * in a thread-local context.
+ * Service interface for managing refresh tokens.
+ * This interface provides methods for saving, validating, and deleting refresh tokens.
  */
-public class UserContext {
-
-    private static final ThreadLocal<String> CURRENT_USER_ID = new ThreadLocal<>();
-
+public interface RefreshTokenService {
+    
     /**
-     * Set the current user ID.
+     * Save a refresh token with user ID.
      *
-     * @param userId the user ID to store in the context
+     * @param userId the user ID
+     * @param refreshToken the refresh token
      */
-    public static void setCurrentUserId(String userId) {
-        CURRENT_USER_ID.set(userId);
-    }
-
+    void saveRefreshToken(String userId, String refreshToken);
+    
     /**
-     * Get the current user ID.
+     * Validate a refresh token and get the user ID.
      *
-     * @return the current user ID, or null if not set
+     * @param refreshToken the refresh token
+     * @return the user ID if valid, null otherwise
      */
-    public static String getCurrentUserId() {
-        return CURRENT_USER_ID.get();
-    }
-
+    String validateAndGetUserId(String refreshToken);
+    
     /**
-     * Clear the current user ID.
+     * Delete a refresh token.
+     *
+     * @param refreshToken the refresh token to delete
      */
-    public static void clear() {
-        CURRENT_USER_ID.remove();
-    }
+    void deleteRefreshToken(String refreshToken);
 }

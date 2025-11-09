@@ -15,37 +15,35 @@
  * limitations under the License.
  */
 
-package io.jauth.core;
+package io.jauth.core.api;
+
+import io.jauth.core.dto.LoginResponse;
+import io.jauth.core.dto.RefreshTokenResponse;
 
 /**
- * User service adapter interface for retrieving user information.
- * Implementations of this interface should provide methods for validating
- * user credentials and retrieving user details for token generation.
+ * Authentication utility interface for handling common authentication operations.
+ * This interface provides methods for login, refresh token, and logout operations
+ * that can be implemented by different modules based on their specific requirements.
  */
-public interface UserServiceAdapter {
-
+public interface AuthUtils {
+    
     /**
-     * Authenticate a user with the given username and password.
-     *
-     * @param username the username
-     * @param password the password
-     * @return true if the credentials are valid, false otherwise
-     */
-    boolean authenticate(String username, String password);
-
-    /**
-     * Get user ID by username.
-     *
-     * @param username the username
-     * @return the user ID, or null if not found
-     */
-    String getUserIdByUsername(String username);
-
-    /**
-     * Check if a user is valid.
+     * Perform login operation for the given user ID.
      *
      * @param userId the user ID
-     * @return true if the user is valid, false otherwise
+     * @return the login response containing tokens and related information
      */
-    boolean isUserValid(String userId);
+    LoginResponse login(String userId);
+    
+    /**
+     * Refresh an access token using a refresh token.
+     *
+     * @return the refresh token response with result information
+     */
+    RefreshTokenResponse refreshToken();
+    
+    /**
+     * Logout a user by deleting the refresh token.
+     */
+    void logout();
 }

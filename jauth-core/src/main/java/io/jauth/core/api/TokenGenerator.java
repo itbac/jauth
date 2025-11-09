@@ -15,41 +15,26 @@
  * limitations under the License.
  */
 
-package io.jauth.demo.auth.service;
-
-import io.jauth.core.TokenGenerator;
-import org.springframework.stereotype.Service;
+package io.jauth.core.api;
 
 /**
- * Demo implementation of TokenGenerator.
- * This service generates access and refresh tokens for authenticated users.
+ * Interface for token generation.
+ * This interface provides methods for generating access and refresh tokens.
  */
-@Service
-public class DemoTokenGenerator implements TokenGenerator {
+public interface TokenGenerator {
     
     /**
      * Generate an access token for the given user ID.
      *
      * @param userId the user ID to include in the token
-     * @param expireMillis the expiration time in milliseconds
      * @return the generated access token
      */
-    @Override
-    public String generateAccessToken(String userId, long expireMillis) {
-        // In a real implementation, you would use JwtUtil to generate the token
-        // For this demo, we'll return a placeholder
-        return "access-token-for-" + userId;
-    }
+    String generateAccessToken(String userId);
     
     /**
      * Generate a refresh token.
      *
      * @return the generated refresh token
      */
-    @Override
-    public String generateRefreshToken() {
-        // In a real implementation, you would generate a proper refresh token
-        // For this demo, we'll return a placeholder
-        return "refresh-token";
-    }
+    String generateRefreshToken();
 }

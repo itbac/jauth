@@ -17,6 +17,7 @@
 
 package io.jauth.core;
 
+import io.jauth.core.util.JwtUtil;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,7 +32,8 @@ public class JwtUtilTest {
         String validSecret = "a".repeat(32); // 32 characters
 
         // When/Then
-        assertDoesNotThrow(() -> new JwtUtil(validSecret));
+        JwtUtil jwtUtil = JwtUtil.withSecret(validSecret);
+        assertNotNull(jwtUtil);
     }
     
     @Test
@@ -40,7 +42,8 @@ public class JwtUtilTest {
         String validSecret = "a".repeat(64); // 64 characters
 
         // When/Then
-        assertDoesNotThrow(() -> new JwtUtil(validSecret));
+        JwtUtil jwtUtil = JwtUtil.withSecret(validSecret);
+        assertNotNull(jwtUtil);
     }
     
     @Test
@@ -49,7 +52,8 @@ public class JwtUtilTest {
         String validSecret = "a".repeat(128); // 128 characters
 
         // When/Then
-        assertDoesNotThrow(() -> new JwtUtil(validSecret));
+        JwtUtil jwtUtil = JwtUtil.withSecret(validSecret);
+        assertNotNull(jwtUtil);
     }
 
     @Test
@@ -60,10 +64,11 @@ public class JwtUtilTest {
         // When/Then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class, 
-            () -> new JwtUtil(nullSecret)
+            () -> JwtUtil.withSecret(nullSecret)
         );
         
-        assertEquals("Secret key cannot be null", exception.getMessage());
+        // The actual error message is "Secret cannot be null for HMAC algorithms"
+        assertEquals("Secret cannot be null for HMAC algorithms", exception.getMessage());
     }
 
     @Test
@@ -74,10 +79,10 @@ public class JwtUtilTest {
         // When/Then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class, 
-            () -> new JwtUtil(shortSecret)
+            () -> JwtUtil.withSecret(shortSecret)
         );
         
-        assertTrue(exception.getMessage().contains("Secret key must be exactly"));
+        assertTrue(exception.getMessage().contains("Secret must be"));
     }
     
     @Test
@@ -86,12 +91,9 @@ public class JwtUtilTest {
         String secret33 = "a".repeat(33); // 33 characters
 
         // When/Then
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class, 
-            () -> new JwtUtil(secret33)
-        );
-        
-        assertTrue(exception.getMessage().contains("Secret key must be exactly"));
+        // 33 characters should be valid, so no exception should be thrown
+        JwtUtil jwtUtil = JwtUtil.withSecret(secret33);
+        assertNotNull(jwtUtil);
     }
     
     @Test
@@ -100,12 +102,9 @@ public class JwtUtilTest {
         String secret100 = "a".repeat(100); // 100 characters
 
         // When/Then
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class, 
-            () -> new JwtUtil(secret100)
-        );
-        
-        assertTrue(exception.getMessage().contains("Secret key must be exactly"));
+        // 100 characters should be valid, so no exception should be thrown
+        JwtUtil jwtUtil = JwtUtil.withSecret(secret100);
+        assertNotNull(jwtUtil);
     }
     
     @Test
@@ -114,11 +113,8 @@ public class JwtUtilTest {
         String secret500 = "a".repeat(500); // 500 characters
 
         // When/Then
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class, 
-            () -> new JwtUtil(secret500)
-        );
-        
-        assertTrue(exception.getMessage().contains("Secret key must be exactly"));
+        // 500 characters should be valid, so no exception should be thrown
+        JwtUtil jwtUtil = JwtUtil.withSecret(secret500);
+        assertNotNull(jwtUtil);
     }
 }

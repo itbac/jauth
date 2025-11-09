@@ -17,8 +17,8 @@
 
 package io.jauth.resource;
 
-import io.jauth.core.JwtUtil;
-import io.jauth.core.UserContext;
+import io.jauth.core.util.JwtUtil;
+import io.jauth.core.util.UserContext;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -91,19 +91,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         try {
             // Validate token
-            if (!jwtUtil.validateAccessToken(token)) {
+            Claims claims = jwtUtil.validateToken(token);
+            if (claims == null) {
                 sendUnauthorizedResponse(response, "invalid_token", "Invalid JWT token");
                 return;
             }
-            
-            // Parse token to get claims
-            Claims claims = jwtUtil.parseAccessToken(token);
             
             // Get user ID from subject
             String userId = claims.getSubject();
             
             // Set user context
-            UserContext.setCurrentUserId(userId);
+            UserContext.setUserId(userId);
             
             // Continue with the filter chain
             filterChain.doFilter(request, response);

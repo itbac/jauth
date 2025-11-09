@@ -17,7 +17,7 @@
 
 package io.jauth.demo.auth.service;
 
-import io.jauth.core.UserServiceAdapter;
+import io.jauth.demo.auth.api.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -28,7 +28,7 @@ import java.util.Map;
  * This service provides user validation and user details for the authentication process.
  */
 @Service
-public class DemoUserServiceAdapter implements UserServiceAdapter {
+public class DemoUserService implements UserService {
     
     // In-memory user storage for demo purposes
     private static final Map<String, User> USERS = new HashMap<>();
@@ -51,9 +51,12 @@ public class DemoUserServiceAdapter implements UserServiceAdapter {
      * @return true if the credentials are valid, false otherwise
      */
     @Override
-    public boolean authenticate(String username, String password) {
+    public String authenticate(String username, String password) {
         User user = USERS.get(username);
-        return user != null && user.getPassword().equals(password);
+        if( user != null && user.getPassword().equals(password)){
+            return user.getId();
+        };
+        return null;
     }
     
     /**
@@ -66,17 +69,6 @@ public class DemoUserServiceAdapter implements UserServiceAdapter {
     public String getUserIdByUsername(String username) {
         User user = USERS.get(username);
         return user != null ? user.getId() : null;
-    }
-    
-    /**
-     * Check if a user is valid.
-     *
-     * @param userId the user ID
-     * @return true if the user is valid, false otherwise
-     */
-    @Override
-    public boolean isUserValid(String userId) {
-        return USER_ID_TO_USERNAME.containsKey(userId);
     }
     
     /**

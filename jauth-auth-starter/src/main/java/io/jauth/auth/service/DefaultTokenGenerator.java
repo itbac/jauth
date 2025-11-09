@@ -15,32 +15,55 @@
  * limitations under the License.
  */
 
-package io.jauth.core;
+package io.jauth.auth.service;
+
+import io.jauth.auth.config.AuthProperties;
+import io.jauth.core.api.TokenGenerator;
+import io.jauth.core.util.JwtUtil;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 /**
- * Token generator interface for creating access and refresh tokens.
- * Implementations of this interface should provide methods for generating
- * JWT tokens for authentication and authorization purposes.
+ * JWT implementation of TokenGenerator.
+ * This service generates access and refresh tokens using JWT and UUID respectively.
  */
-public interface TokenGenerator {
+@Service
+public class DefaultTokenGenerator implements TokenGenerator {
+
+    private final JwtUtil jwtUtil;
+    private final AuthProperties authProperties;
+
+    /**
+     * Constructor for DefaultTokenGenerator.
+     *
+     * @param jwtUtil the JWT utility for token operations
+     * @param authProperties the authentication properties
+     */
+    public DefaultTokenGenerator(JwtUtil jwtUtil, AuthProperties authProperties) {
+        this.jwtUtil = jwtUtil;
+        this.authProperties = authProperties;
+    }
 
     /**
      * Generate an access token for the given user ID.
      *
      * @param userId the user ID to include in the token
-     * @param expireMillis the expiration time in milliseconds
      * @return the generated access token
      */
-    String generateAccessToken(String userId, long expireMillis);
+    @Override
+    public String generateAccessToken(String userId) {
+        long expireMillis = authProperties.getAccessToken().getExpiresIn() * 1000;
+        return jwtUtil.generateAccessToken(userId, expireMillis);
+    }
 
     /**
      * Generate a refresh token.
      *
      * @return the generated refresh token
      */
-    default String generateRefreshToken() {
+    @Override
+    public String generateRefreshToken() {
         return UUID.randomUUID().toString();
     }
 }

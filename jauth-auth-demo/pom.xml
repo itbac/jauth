@@ -41,6 +41,34 @@
             <scope>runtime</scope>
         </dependency>
         
+        <!-- JPaseto API -->
+        <dependency>
+            <groupId>dev.paseto</groupId>
+            <artifactId>jpaseto-api</artifactId>
+            <version>0.6.0</version>
+        </dependency>
+        
+        <!-- JPaseto Implementation -->
+        <dependency>
+            <groupId>dev.paseto</groupId>
+            <artifactId>jpaseto-impl</artifactId>
+            <version>0.6.0</version>
+        </dependency>
+        
+        <!-- JPaseto Jackson support -->
+        <dependency>
+            <groupId>dev.paseto</groupId>
+            <artifactId>jpaseto-jackson</artifactId>
+            <version>0.6.0</version>
+        </dependency>
+        
+        <!-- JPaseto Bouncy Castle support (needed for crypto operations) -->
+        <dependency>
+            <groupId>dev.paseto</groupId>
+            <artifactId>jpaseto-bouncy-castle</artifactId>
+            <version>0.6.0</version>
+        </dependency>
+        
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -55,6 +83,14 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>3.2.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>io.jauth.demo.auth.RsaKeyPairGeneratorMain</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -17,7 +17,7 @@
 
 package io.jauth.resource;
 
-import io.jauth.core.JwtUtil;
+import io.jauth.core.util.JwtUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -46,7 +46,8 @@ public class ResourceAutoConfiguration {
     public JwtUtil jwtUtil(ResourceSecurityProperties resourceSecurityProperties) {
         // In a real application, you would get the secret from configuration
         // For now, we're using a default secret for demonstration purposes
-        return new JwtUtil("my-default-secret-key-change-in-production");
+        // The secret must be at least 32 characters long
+        return JwtUtil.withSecret("my-default-secret-key-change-in-production-0123456789");
     }
 
     /**
