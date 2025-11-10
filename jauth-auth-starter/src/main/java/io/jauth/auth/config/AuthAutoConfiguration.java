@@ -21,7 +21,6 @@ import io.jauth.auth.service.AdvancedSignatureGenerator;
 import io.jauth.auth.service.DefaultAuthUtils;
 import io.jauth.auth.service.DefaultRefreshTokenService;
 import io.jauth.auth.service.DefaultTokenGenerator;
-import io.jauth.auth.util.SecretResolver;
 import io.jauth.core.api.AuthUtils;
 import io.jauth.core.api.RefreshTokenService;
 import io.jauth.core.api.SignatureGenerator;
@@ -42,32 +41,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 @EnableConfigurationProperties(AuthProperties.class)
 public class AuthAutoConfiguration {
 
-    /**
-     * Create a JwtUtil bean using the configured secret.
-     *
-     * @param authProperties the authentication properties
-     * @return a JwtUtil instance
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public JwtUtil jwtUtil(AuthProperties authProperties) {
-        String algorithm = authProperties.getAccessToken().getAlgorithm();
-        
-        if ("RS256".equals(algorithm)) {
-            // For RS256, use public and private keys
-            String publicKey = authProperties.getAccessToken().getPublicKey();
-            String privateKey = authProperties.getAccessToken().getPrivateKey();
-            return JwtUtil.withKeys(algorithm, publicKey, privateKey);
-        } else {
-            // For HMAC algorithms, use secret
-            String secret = authProperties.getAccessToken().getSecret();
-            // Ensure the secret is at least 32 characters long
-            if (secret.length() < 32) {
-                throw new IllegalArgumentException("Secret must be at least 32 characters long for HMAC algorithms");
-            }
-            return JwtUtil.withSecret(algorithm, secret);
-        }
-    }
+
 
     /**
      * Create a DefaultTokenGenerator bean.
@@ -78,8 +52,8 @@ public class AuthAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public DefaultTokenGenerator defaultTokenGenerator(JwtUtil jwtUtil, AuthProperties authProperties) {
-        return new DefaultTokenGenerator(jwtUtil, authProperties);
+    public DefaultTokenGenerator defaultTokenGenerator(AuthProperties authProperties) {
+        return new DefaultTokenGenerator(authProperties);
     }
     
     /**
@@ -109,9 +83,8 @@ public class AuthAutoConfiguration {
     public DefaultRefreshTokenService defaultRefreshTokenService(
             RedisTemplate<String, String> redisTemplate,
             AuthProperties authProperties,
-            SignatureGenerator signatureGenerator,
-            SecretResolver secretResolver) {
-        return new DefaultRefreshTokenService(redisTemplate, authProperties, signatureGenerator, secretResolver);
+            SignatureGenerator signatureGenerator) {
+        return new DefaultRefreshTokenService(redisTemplate, authProperties, signatureGenerator);
     }
     
     /**
@@ -153,18 +126,7 @@ public class AuthAutoConfiguration {
         return new DefaultAuthUtils(tokenGenerator, authProperties, refreshTokenService);
     }
     
-    /**
-     * Create a SecretResolver bean.
-     *
-     * @param authProperties the authentication properties
-     * @return a SecretResolver instance
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public SecretResolver secretResolver(AuthProperties authProperties) {
-        return new SecretResolver(authProperties);
-    }
-    
+
     /**
      * Create an AuthUtils bean.
      *

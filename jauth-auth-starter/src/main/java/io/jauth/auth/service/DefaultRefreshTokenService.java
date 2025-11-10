@@ -18,17 +18,12 @@
 package io.jauth.auth.service;
 
 import io.jauth.auth.config.AuthProperties;
-import io.jauth.auth.service.AdvancedSignatureGenerator;
-import io.jauth.auth.util.SecretResolver;
 import io.jauth.core.api.RefreshTokenService;
 import io.jauth.core.api.SignatureGenerator;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +40,6 @@ public class DefaultRefreshTokenService implements RefreshTokenService {
     private final RedisTemplate<String, String> redisTemplate;
     private final AuthProperties authProperties;
     private final SignatureGenerator signatureGenerator;
-    private final SecretResolver secretResolver;
 
     /**
      * Constructor for DefaultRefreshTokenService.
@@ -53,16 +47,13 @@ public class DefaultRefreshTokenService implements RefreshTokenService {
      * @param redisTemplate the Redis template for string operations
      * @param authProperties the authentication properties
      * @param signatureGenerator the signature generator
-     * @param secretResolver the secret resolver
      */
     public DefaultRefreshTokenService(RedisTemplate<String, String> redisTemplate,
                                       AuthProperties authProperties,
-                                      SignatureGenerator signatureGenerator,
-                                      SecretResolver secretResolver) {
+                                      SignatureGenerator signatureGenerator) {
         this.redisTemplate = redisTemplate;
         this.authProperties = authProperties;
         this.signatureGenerator = signatureGenerator;
-        this.secretResolver = secretResolver;
     }
 
     /**

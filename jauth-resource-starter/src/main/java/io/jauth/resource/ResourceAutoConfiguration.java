@@ -17,7 +17,6 @@
 
 package io.jauth.resource;
 
-import io.jauth.core.util.JwtUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -36,31 +35,18 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @EnableConfigurationProperties(ResourceSecurityProperties.class)
 public class ResourceAutoConfiguration {
 
-    /**
-     * Create a JwtUtil bean for handling JWT operations.
-     *
-     * @param resourceSecurityProperties the resource security properties
-     * @return a JwtUtil instance
-     */
-    @Bean
-    public JwtUtil jwtUtil(ResourceSecurityProperties resourceSecurityProperties) {
-        // In a real application, you would get the secret from configuration
-        // For now, we're using a default secret for demonstration purposes
-        // The secret must be at least 32 characters long
-        return JwtUtil.withSecret("my-default-secret-key-change-in-production-0123456789");
-    }
+
 
     /**
      * Create a JwtAuthenticationFilter bean for validating JWT tokens.
      *
-     * @param jwtUtil the JWT utility
      * @param resourceSecurityProperties the resource security properties
      * @return a JwtAuthenticationFilter instance
      */
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtUtil jwtUtil, 
+    public JwtAuthenticationFilter jwtAuthenticationFilter(
                                                           ResourceSecurityProperties resourceSecurityProperties) {
-        return new JwtAuthenticationFilter(jwtUtil, resourceSecurityProperties);
+        return new JwtAuthenticationFilter(resourceSecurityProperties);
     }
 
     /**

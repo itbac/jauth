@@ -21,6 +21,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Configuration properties for resource server security.
@@ -29,6 +30,13 @@ import java.util.List;
 @ConfigurationProperties(prefix = "jauth.security")
 @Component
 public class ResourceSecurityProperties {
+
+    /**
+     * 客户端类型请求头名称
+     */
+    private String clientTypeHeaderName;
+
+    private Map<String, String> publicKeys;
 
     /**
      * List of secure paths that require authentication.
@@ -74,5 +82,13 @@ public class ResourceSecurityProperties {
      */
     public void setPermitAllPaths(List<String> permitAllPaths) {
         this.permitAllPaths = permitAllPaths;
+    }
+
+    public Map<String, String> getPublicKeys() {
+        return publicKeys;
+    }
+
+    public String getClientTypeHeaderName() {
+        return clientTypeHeaderName;
     }
 }

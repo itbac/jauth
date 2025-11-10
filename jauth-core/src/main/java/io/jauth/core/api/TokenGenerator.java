@@ -29,7 +29,7 @@ public interface TokenGenerator {
      * @param userId the user ID to include in the token
      * @return the generated access token
      */
-    String generateAccessToken(String userId);
+    String generateAccessToken(String userId) throws Exception;
     
     /**
      * Generate a refresh token.

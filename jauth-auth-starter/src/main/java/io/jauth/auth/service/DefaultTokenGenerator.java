@@ -18,10 +18,17 @@
 package io.jauth.auth.service;
 
 import io.jauth.auth.config.AuthProperties;
+import io.jauth.auth.config.ClientTypeConfig;
+import io.jauth.auth.util.RequestContextUtil;
 import io.jauth.core.api.TokenGenerator;
+import io.jauth.core.util.Ed25519KeyGenerator;
 import io.jauth.core.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.security.PrivateKey;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -31,18 +38,28 @@ import java.util.UUID;
 @Service
 public class DefaultTokenGenerator implements TokenGenerator {
 
-    private final JwtUtil jwtUtil;
     private final AuthProperties authProperties;
+
+    private Map<String, PrivateKey> privateKeyMap;
 
     /**
      * Constructor for DefaultTokenGenerator.
      *
-     * @param jwtUtil the JWT utility for token operations
      * @param authProperties the authentication properties
      */
-    public DefaultTokenGenerator(JwtUtil jwtUtil, AuthProperties authProperties) {
-        this.jwtUtil = jwtUtil;
+    public DefaultTokenGenerator(AuthProperties authProperties) {
         this.authProperties = authProperties;
+        if (null != authProperties.getClientType() && !authProperties.getClientType().isEmpty()) {
+            authProperties.getClientType().forEach((k, v) -> {
+                AuthProperties.AccessToken accessToken = v.getAccessToken();
+                try {
+                    PrivateKey privateKey = Ed25519KeyGenerator.loadPrivateKey(accessToken.getPrivateKey());
+                    privateKeyMap.put(k, privateKey);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
     }
 
     /**
@@ -52,9 +69,18 @@ public class DefaultTokenGenerator implements TokenGenerator {
      * @return the generated access token
      */
     @Override
-    public String generateAccessToken(String userId) {
+    public String generateAccessToken(String userId) throws Exception {
         long expireMillis = authProperties.getAccessToken().getExpiresIn() * 1000;
-        return jwtUtil.generateAccessToken(userId, expireMillis);
+        String clientType = getClientType();
+        PrivateKey privateKey = privateKeyMap.get(clientType);
+        return JwtUtil.generateAccessToken(privateKey, userId, expireMillis, null, clientType);
+    }
+
+    private String getClientType() {
+        String clientTypeHeaderName = StringUtils.defaultIfBlank(authProperties.getClientTypeHeaderName(), "X-Client-Type");
+        HttpServletRequest currentRequest = RequestContextUtil.getCurrentRequest();
+        String clientType = currentRequest.getHeader(clientTypeHeaderName);
+        return clientType;
     }
 
     /**

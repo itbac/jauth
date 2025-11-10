@@ -36,6 +36,12 @@ import java.util.Map;
 public class AuthProperties {
 
     /**
+     * 客户端类型请求头名称
+     */
+    private String clientTypeHeaderName;
+
+
+    /**
      * Client type specific configurations.
      * This allows different client types (web, app, mini-program) to use different secrets and token strategies.
      */
@@ -473,5 +479,11 @@ public class AuthProperties {
             // Return default value for backward compatibility
             return true;
         }
+
+
+    }
+
+    public String getClientTypeHeaderName() {
+        return clientTypeHeaderName;
     }
 }

@@ -18,6 +18,7 @@
 package io.jauth.auth.service;
 
 import io.jauth.auth.config.AuthProperties;
+import io.jauth.auth.util.RequestContextUtil;
 import io.jauth.core.api.AuthUtils;
 import io.jauth.core.api.RefreshTokenService;
 import io.jauth.core.api.TokenGenerator;
@@ -28,10 +29,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.StringUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Web-based implementation of AuthUtils for JAuth.
@@ -57,25 +54,7 @@ public class DefaultAuthUtils implements AuthUtils {
         this.refreshTokenService = refreshTokenService;
     }
     
-    /**
-     * Get the current HTTP servlet request from Spring's RequestContextHolder.
-     *
-     * @return the current HTTP servlet request
-     */
-    private HttpServletRequest getCurrentRequest() {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        return attributes != null ? attributes.getRequest() : null;
-    }
-    
-    /**
-     * Get the current HTTP servlet response from Spring's RequestContextHolder.
-     *
-     * @return the current HTTP servlet response
-     */
-    private HttpServletResponse getCurrentResponse() {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        return attributes != null ? attributes.getResponse() : null;
-    }
+
     
     /**
      * Check if the current request is from a web client (browser).
@@ -85,7 +64,7 @@ public class DefaultAuthUtils implements AuthUtils {
      * @return true if the request is from a web client, false otherwise
      */
     private boolean isWebRequest() {
-        HttpServletRequest request = getCurrentRequest();
+        HttpServletRequest request = RequestContextUtil.getCurrentRequest();
         if (request == null) {
             return false;
         }
@@ -123,10 +102,15 @@ public class DefaultAuthUtils implements AuthUtils {
             throw new IllegalArgumentException("Parameter error: userId");
         }
         // Get current request
-        HttpServletRequest request = getCurrentRequest();
+        HttpServletRequest request = RequestContextUtil.getCurrentRequest();
         
         // Generate tokens with default expiration time
-        String accessToken = tokenGenerator.generateAccessToken(userId);
+        String accessToken = null;
+        try {
+            accessToken = tokenGenerator.generateAccessToken(userId);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("error: generateAccessToken");
+        }
         String refreshToken = tokenGenerator.generateRefreshToken();
         long loginTime = System.currentTimeMillis();
         
@@ -163,7 +147,7 @@ public class DefaultAuthUtils implements AuthUtils {
      */
     @Override
     public RefreshTokenResponse refreshToken() {
-        HttpServletRequest request = getCurrentRequest();
+        HttpServletRequest request = RequestContextUtil.getCurrentRequest();
         if (request == null) {
             return new RefreshTokenResponse(RefreshTokenResponse.RESULT_INTERNAL_ERROR);
         }
@@ -262,7 +246,7 @@ public class DefaultAuthUtils implements AuthUtils {
      */
     @Override
     public void logout() {
-        HttpServletRequest request = getCurrentRequest();
+        HttpServletRequest request = RequestContextUtil.getCurrentRequest();
         if (request == null) {
             return;
         }
@@ -304,7 +288,7 @@ public class DefaultAuthUtils implements AuthUtils {
         
         // Clear refresh token cookie if it's a web request
         if (isWebRequest()) {
-            HttpServletResponse response = getCurrentResponse();
+            HttpServletResponse response = RequestContextUtil.getCurrentResponse();
             if (response != null) {
                 // Use header-based approach to clear cookie with SameSite attribute
                 String sameSite = authProperties.getRefreshToken().getSecurity().getCookieSameSite();
@@ -338,7 +322,7 @@ public class DefaultAuthUtils implements AuthUtils {
      * @param refreshToken the refresh token to set in the cookie
      */
     private void setRefreshTokenCookie(String refreshToken) {
-        HttpServletResponse response = getCurrentResponse();
+        HttpServletResponse response = RequestContextUtil.getCurrentResponse();
         if (response != null) {
             // Use header-based approach to set cookie with SameSite attribute
             // This is needed because Cookie.setSameSite() is not available in all Servlet API versions

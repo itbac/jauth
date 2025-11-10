@@ -17,6 +17,7 @@
 
 package io.jauth.resource;
 
+import io.jauth.core.util.Ed25519KeyGenerator;
 import io.jauth.core.util.JwtUtil;
 import io.jauth.core.util.UserContext;
 import io.jsonwebtoken.Claims;
@@ -24,12 +25,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.List;
 import java.util.Map;
 
@@ -40,19 +43,29 @@ import java.util.Map;
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
     private final ResourceSecurityProperties resourceSecurityProperties;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
+    //公钥验签
+    private Map<String, PublicKey> publicKeyMap;
 
     /**
      * Constructor for JwtAuthenticationFilter.
      *
-     * @param jwtUtil the JWT utility for validating tokens
      * @param resourceSecurityProperties the resource security properties
      */
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, ResourceSecurityProperties resourceSecurityProperties) {
-        this.jwtUtil = jwtUtil;
+    public JwtAuthenticationFilter(ResourceSecurityProperties resourceSecurityProperties) {
         this.resourceSecurityProperties = resourceSecurityProperties;
+        Map<String, String> publicKeys = resourceSecurityProperties.getPublicKeys();
+        if (null != publicKeys && !publicKeys.isEmpty()) {
+            publicKeys.forEach((k, v) -> {
+                try {
+                    PublicKey publicKey = Ed25519KeyGenerator.loadPublicKey(v);
+                    publicKeyMap.put(k, publicKey);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
     }
 
     /**
@@ -83,15 +96,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         
         String token = extractToken(request);
-        
         if (token == null) {
             sendUnauthorizedResponse(response, "missing_token", "Missing JWT token");
+            return;
+        }
+        String clientTypeHeaderName = StringUtils.defaultIfBlank(resourceSecurityProperties.getClientTypeHeaderName(), "X-Client-Type");
+        String clientType = request.getHeader(clientTypeHeaderName);
+        if (clientType == null) {
+            sendUnauthorizedResponse(response, "missing_clientType", "Missing X-Client-Type");
             return;
         }
         
         try {
             // Validate token
-            Claims claims = jwtUtil.validateToken(token);
+            Claims claims = JwtUtil.validateToken(publicKeyMap.get(clientType), token, null, null);
             if (claims == null) {
                 sendUnauthorizedResponse(response, "invalid_token", "Invalid JWT token");
                 return;
