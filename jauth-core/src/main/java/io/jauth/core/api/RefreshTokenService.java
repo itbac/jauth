@@ -22,6 +22,14 @@ package io.jauth.core.api;
  * This interface provides methods for saving, validating, and deleting refresh tokens.
  */
 public interface RefreshTokenService {
+
+
+    /**
+     * Generate a refresh token.
+     *
+     * @return the generated refresh token
+     */
+    String generateRefreshToken();
     
     /**
      * Save a refresh token with user ID.

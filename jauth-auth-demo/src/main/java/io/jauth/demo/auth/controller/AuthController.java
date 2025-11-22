@@ -19,11 +19,10 @@ package io.jauth.demo.auth.controller;
 
 import io.jauth.core.api.AuthUtils;
 import io.jauth.core.api.RefreshTokenService;
-import io.jauth.core.api.TokenGenerator;
-import io.jauth.demo.auth.api.UserService;
 import io.jauth.core.dto.LoginResponse;
 import io.jauth.core.dto.RefreshTokenResponse;
 import io.jauth.core.util.JwtUtil;
+import io.jauth.demo.auth.api.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,8 +44,6 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private TokenGenerator tokenGenerator;
     @Autowired
     private RefreshTokenService refreshTokenService;
     @Autowired

@@ -19,9 +19,9 @@ package io.jauth.auth.service;
 
 import io.jauth.auth.config.AuthProperties;
 import io.jauth.auth.util.RequestContextUtil;
+import io.jauth.core.api.AccessTokenService;
 import io.jauth.core.api.AuthUtils;
 import io.jauth.core.api.RefreshTokenService;
-import io.jauth.core.api.TokenGenerator;
 import io.jauth.core.dto.LoginResponse;
 import io.jauth.core.dto.RefreshTokenResponse;
 import io.netty.util.internal.StringUtil;
@@ -36,26 +36,16 @@ import org.apache.commons.codec.binary.StringUtils;
  */
 public class DefaultAuthUtils implements AuthUtils {
     
-    private final TokenGenerator tokenGenerator;
     private final AuthProperties authProperties;
+    private final AccessTokenService accessTokenService;
     private final RefreshTokenService refreshTokenService;
-    
-    /**
-     * Constructor for DefaultAuthUtils.
-     *
-     * @param tokenGenerator the token generator
-     * @param authProperties the authentication properties
-     * @param refreshTokenService the refresh token service
-     */
-    public DefaultAuthUtils(TokenGenerator tokenGenerator, AuthProperties authProperties, 
-                     RefreshTokenService refreshTokenService) {
-        this.tokenGenerator = tokenGenerator;
+
+    public DefaultAuthUtils(AuthProperties authProperties, AccessTokenService accessTokenService, RefreshTokenService refreshTokenService) {
         this.authProperties = authProperties;
+        this.accessTokenService = accessTokenService;
         this.refreshTokenService = refreshTokenService;
     }
-    
 
-    
     /**
      * Check if the current request is from a web client (browser).
      * This is determined by checking if the request contains a specific header
@@ -107,11 +97,11 @@ public class DefaultAuthUtils implements AuthUtils {
         // Generate tokens with default expiration time
         String accessToken = null;
         try {
-            accessToken = tokenGenerator.generateAccessToken(userId);
+            accessToken = accessTokenService.generateAccessToken(userId);
         } catch (Exception e) {
             throw new IllegalArgumentException("error: generateAccessToken");
         }
-        String refreshToken = tokenGenerator.generateRefreshToken();
+        String refreshToken = refreshTokenService.generateRefreshToken();
         long loginTime = System.currentTimeMillis();
         
         // Save refresh token in Redis
@@ -205,8 +195,8 @@ public class DefaultAuthUtils implements AuthUtils {
             }
             
             // Generate new tokens
-            String accessToken = tokenGenerator.generateAccessToken(userId);
-            String newRefreshToken = tokenGenerator.generateRefreshToken();
+            String accessToken = accessTokenService.generateAccessToken(userId);
+            String newRefreshToken = refreshTokenService.generateRefreshToken();
             long newLoginTime = System.currentTimeMillis();
             
             // Delete old refresh token and save new one with signature in Redis

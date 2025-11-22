@@ -17,14 +17,8 @@
 
 package io.jauth.auth.config;
 
-import io.jauth.auth.service.AdvancedSignatureGenerator;
-import io.jauth.auth.service.DefaultAuthUtils;
-import io.jauth.auth.service.DefaultRefreshTokenService;
-import io.jauth.auth.service.DefaultTokenGenerator;
-import io.jauth.core.api.AuthUtils;
-import io.jauth.core.api.RefreshTokenService;
-import io.jauth.core.api.SignatureGenerator;
-import io.jauth.core.api.TokenGenerator;
+import io.jauth.auth.service.*;
+import io.jauth.core.api.*;
 import io.jauth.core.util.JwtUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -43,30 +37,8 @@ public class AuthAutoConfiguration {
 
 
 
-    /**
-     * Create a DefaultTokenGenerator bean.
-     *
-     * @param jwtUtil the JWT utility
-     * @param authProperties the authentication properties
-     * @return a DefaultTokenGenerator instance
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public DefaultTokenGenerator defaultTokenGenerator(AuthProperties authProperties) {
-        return new DefaultTokenGenerator(authProperties);
-    }
-    
-    /**
-     * Create a TokenGenerator bean.
-     *
-     * @param defaultTokenGenerator the default token generator
-     * @return a TokenGenerator instance
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public TokenGenerator tokenGenerator(DefaultTokenGenerator defaultTokenGenerator) {
-        return defaultTokenGenerator;
-    }
+
+
     
     /**
      * Create a DefaultRefreshTokenService bean.
@@ -85,6 +57,11 @@ public class AuthAutoConfiguration {
             AuthProperties authProperties,
             SignatureGenerator signatureGenerator) {
         return new DefaultRefreshTokenService(redisTemplate, authProperties, signatureGenerator);
+    }
+    @Bean
+    @ConditionalOnMissingBean
+    public AccessTokenService accessTokenService(AuthProperties authProperties){
+        return new DefaultAccessTokenService(authProperties);
     }
     
     /**
@@ -110,20 +87,21 @@ public class AuthAutoConfiguration {
     public SignatureGenerator signatureGenerator(AuthProperties authProperties) {
         return new AdvancedSignatureGenerator(authProperties);
     }
-    
+
     /**
      * Create a DefaultAuthUtils bean.
      *
-     * @param tokenGenerator the token generator
-     * @param authProperties the authentication properties
+     * @param tokenGenerator      the token generator
+     * @param authProperties      the authentication properties
      * @param refreshTokenService the refresh token service
      * @return a DefaultAuthUtils instance
      */
     @Bean
     @ConditionalOnMissingBean
-    public DefaultAuthUtils defaultAuthUtils(TokenGenerator tokenGenerator, AuthProperties authProperties,
+    public DefaultAuthUtils defaultAuthUtils(AuthProperties authProperties,
+                                             AccessTokenService accessTokenService,
                                              RefreshTokenService refreshTokenService) {
-        return new DefaultAuthUtils(tokenGenerator, authProperties, refreshTokenService);
+        return new DefaultAuthUtils(authProperties, accessTokenService, refreshTokenService);
     }
     
 

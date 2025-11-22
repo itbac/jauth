@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -54,6 +55,11 @@ public class DefaultRefreshTokenService implements RefreshTokenService {
         this.redisTemplate = redisTemplate;
         this.authProperties = authProperties;
         this.signatureGenerator = signatureGenerator;
+    }
+
+    @Override
+    public String generateRefreshToken() {
+        return UUID.randomUUID().toString();
     }
 
     /**
